@@ -1,0 +1,44 @@
+<DOCTYPE! html>
+<html>
+    <head>
+        <style>
+            body{
+                background: blue;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                justify-items: center;
+            }
+            .input input{
+                height: 43px;
+            }
+            .input button{
+                height: 43px;
+            }
+        </style>
+        <script>
+            function teste(){
+                
+                $.ajax({
+                    type: "post",
+                    beforeSend: function(request) {
+                        request.setRequestHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjEiLCJuYW1lIjoiZmFpbGNyZWF0b3IwLjBAZ21haWwuY29tIn0=.HstgXwRkvzwJuuf4h8ImqM4i3PorWSwIGGgCxnm94Pw=");
+                    },
+                    url: "http://localhost/api/test_email.php",
+                    data: {email: $("#email").val()},
+                    success: function(data) {
+                        console.log(data)
+                    }
+                });
+            }
+        </script>
+        <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <div class="input">
+            <input id="email">
+            <button onclick="teste()">Enviar</button>
+        </div>
+    </body>
+</html>

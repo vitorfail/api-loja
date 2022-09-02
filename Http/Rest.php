@@ -17,6 +17,7 @@
     require_once('criarcheck.php');
     require_once('check.php');
     require_once('faturamento_ano.php');
+    require_once('tipo_pagamento.php');
 
     class Rest{
         private $request;

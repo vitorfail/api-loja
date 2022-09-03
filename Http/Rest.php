@@ -18,6 +18,7 @@
     require_once('check.php');
     require_once('faturamento_ano.php');
     require_once('tipo_pagamento.php');
+    require_once('contas.php');
 
     class Rest{
         private $request;

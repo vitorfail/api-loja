@@ -13,19 +13,20 @@
                 include('conexao.php');
                 $dados_de_usuario_sql = AuthController::dados_de_sql();
                 $ano = md5($_POST['ano']);
+                $mes = md5($_POST['mes']);
                 $sql = '';
                 if($mes == "ce01cfda7eb894982ea7d3623e050298"){
-                    $sql = "SELECT data_vencimento, data_pagamento, descricao, valor_despesas  FROM `user_despesas` WHERE YEAR(data_vencimento) = ".$_POST['ano']." and `user_id` = ".$dados_de_usuario_sql->id.;
+                    $sql = "SELECT data_vencimento AS data_vencimento, data_pagamento AS data_pagamento, descricao AS descricao , valor_despesas AS valor_despesas, situacao AS situacao   FROM `user_despesas` WHERE YEAR(data_vencimento) = ".$_POST['ano']." and `user_id` = ".$dados_de_usuario_sql->id;
                 }
                 else{
-                    $sql = "SELECT data_vencimento, data_pagamento, descricao, valor_despesas  FROM `user_despesas` WHERE (YEAR(data_vencimento), MONTH(data_vencimento), `user_id` ) = (".$_POST['ano'].", ".$_POST['mes'].",".$dados_de_usuario_sql->id.")";
+                    $sql = "SELECT data_vencimento AS data_vencimento, data_pagamento AS data_pagamento, descricao AS descricao , valor_despesas AS valor_despesas, situacao AS situacao  FROM `user_despesas` WHERE (YEAR(data_vencimento), MONTH(data_vencimento), `user_id` ) = (".$_POST['ano'].", ".$_POST['mes'].",".$dados_de_usuario_sql->id.")";
                 }
                 $pesquisa = $conexao->query($sql);
                 $resultado = $pesquisa->fetchAll();
                 $conexao = null;
                 if($resultado != false){
                     if(count($resultado) > 0){
-                        return $resultado[0];            
+                        return $resultado;            
                     }
                     else{
                         return 0;
@@ -41,7 +42,7 @@
 
         }
         public function pesquisa(){
-            $contas = $this->faturamento_mensal();
+            $contas = $this->contas();
             return  $contas;
         }
     }

@@ -170,6 +170,10 @@
                 return 'Operação inválida';
             }
         }
+        public function verificar(){
+            $mail = $_POST("email");
+            $sql = "SELECT id FROM users_info WHERE email =".$mail." AND verif_code = ".$_POST["verif_code"];
+        }
         public static function checkAuth(){
             $http_header = apache_request_headers();
             if(isset($http_header[$GLOBALS['a']]) && $http_header[$GLOBALS['a']] != null){

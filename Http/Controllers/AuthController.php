@@ -135,10 +135,11 @@
                 }
                 else{
                     try{
-                        $sql= "INSERT INTO `users_info` (`nome`, `email`, `telefone`, `ip`, `plano`, `valor-plano`, `data_vencimento`, `data-contratacao`, `situacao`, `senha`, endereco) VALUES
+                        $verif = strval(rand(0,9)).strval(rand(0,9)).strval(rand(0,9)).strval(rand(0,9)).strval(rand(0,9)).strval(rand(0,9));
+                        $sql= "INSERT INTO `users_info` (`nome`, `email`, `telefone`, `ip`, `plano`, `valor-plano`, `data_vencimento`, `data-contratacao`, `situacao`, `senha`, endereco, verif_code) VALUES
                         (:nome, :email, :telefone, :ip, 
                         :plano, :valor_plano, :data_venci, :data_contratacao, 'Aberto', :endereco
-                        :password)";
+                        :password, :verif_code)";
                         $inserir = $conexao->prepare($sql);
                         $inserir->bindValue(':nome' ,$nome);
                         $inserir->bindValue(':email' ,$email);
@@ -150,6 +151,7 @@
                         $inserir->bindValue(':data_contratacao' ,$data_contratacao);
                         $inserir->bindValue(':endereco' ,$endereco);
                         $inserir->bindValue(':password' ,$password);
+                        $inserir->bindValue(':verif_code' ,$verif);
                         $inserir->execute();
     
                         $sql2= "INSERT INTO `user_financeiro`(caixa, custos_fixos, user_email) VALUES(0, 0, :email)";

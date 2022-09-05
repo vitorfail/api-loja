@@ -5,7 +5,6 @@
     header("Access-Control-Allow-Methods: GET,HEAD,OPTIONS,POST,PUT");
     header("Access-Control-Allow-Headers: *");
     date_default_timezone_set('America/Sao_Paulo');
-    $GLOBALS['a'] = 'Authorization';
     $_POST = json_decode(file_get_contents("php://input"), true);
     class ContasController{
         public function contas(){

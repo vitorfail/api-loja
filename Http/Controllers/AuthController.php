@@ -136,10 +136,11 @@
                 else{
                     try{
                         $verif = strval(rand(0,9)).strval(rand(0,9)).strval(rand(0,9)).strval(rand(0,9)).strval(rand(0,9)).strval(rand(0,9));
-                        $sql= "INSERT INTO `users_info` (`nome`, `email`, `telefone`, `ip`, `plano`, `valor-plano`, `data_vencimento`, `data-contratacao`, `situacao`, `senha`, endereco, verif_code) VALUES
+                        $sql= "INSERT INTO `users_info` (`nome`, `email`, `telefone`, `ip`, `plano`, `valor-plano`, `data_vencimento`
+                        , `data-contratacao`, `situacao`, `senha`, endereco, verif_code, check_pay, foto_perfil) VALUES
                         (:nome, :email, :telefone, :ip, 
-                        :plano, :valor_plano, :data_venci, :data_contratacao, 'Aberto', :endereco
-                        :password, :verif_code)";
+                        :plano, :valor_plano, :data_venci, :data_contratacao, 'Aberto', 
+                        :password, :endereco, :verif_code, null, null)";
                         $inserir = $conexao->prepare($sql);
                         $inserir->bindValue(':nome' ,$nome);
                         $inserir->bindValue(':email' ,$email);
@@ -171,8 +172,30 @@
             }
         }
         public function verificar(){
-            $mail = $_POST("email");
-            $sql = "SELECT id FROM users_info WHERE email =".$mail." AND verif_code = ".$_POST["verif_code"];
+            include('conexao.php');
+            $mail = $_POST["email"];
+            $sql = "SELECT id FROM users_info WHERE email = :email AND verif_code = :verif_code";
+            $pesquisa = $conexao->prepare($sql);
+            $pesquisa->bindValue(':email', $mail);
+            $pesquisa->bindValue(':verif_code', $_POST['verif_code']);
+            $pesquisa->execute();
+            if($pesquisa){
+                $puxar= $pesquisa->fetchAll();
+                if(count($puxar)> 0){
+                    $up = "UPDATE users_info SET verif_code = :verif_code WHERE email = :email";
+                    $p = $conexao->prepare($up);    
+                    $p->bindValue(":verif_code", null);
+                    $p->bindValue(":email", $mail);
+                    $p->execute();
+                    return '1';   
+                }
+                else{
+                    return '0';
+                }        
+            }
+            else{
+                return '0';
+            }
         }
         public static function checkAuth(){
             $http_header = apache_request_headers();

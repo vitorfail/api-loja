@@ -7,7 +7,7 @@
     $GLOBALS['a'] = 'Authorization';
     $_POST = json_decode(file_get_contents("php://input"), true);
     function Check_user($usuario, $senha){
-        include_once("./conexao.php");
+        include("./conexao.php");
 
         $sql = "SELECT id, nome, situacao, email, telefone, endereco FROM users_info WHERE email=:usuario and senha=:senha ";
         $pesquisa = $conexao->prepare($sql);
@@ -64,44 +64,47 @@
         return array($check, $id, $nome, $situacao);
     }
     class AuthController{
+        public function Criar_token($user, $pass){
+            $resultado = Check_user($user, $pass);
+
+            if($resultado[0] >0){
+                $key = 'KILLLAKILLERUIM';
+
+                //Header Token
+                $header = [
+                    'typ' => 'JWT',
+                    'alg' => 'HS256'
+                ];
+        
+                //Payload - Content
+                $payload = [
+                    'id' => $resultado[1],
+                    'name' => $user
+                ];
+        
+                //JSON
+                $header = json_encode($header);
+                $payload = json_encode($payload);
+        
+                //Base 64
+                $header = base64_encode($header);
+                $payload = base64_encode($payload);
+        
+                //Sign
+                $sign = hash_hmac('sha256', $header . "." . $payload, $key, true);
+                $sign = base64_encode($sign);
+        
+                //Token
+                $token = $header . '.' . $payload . '.' . $sign;
+                return array($token, $resultado[2], $resultado[3],  'email' => $resultado['email'], 'telefone' => $resultado['telefone'], 'endereco' => $resultado['endereco']);  
+            }
+            else{
+                return 'Usuário não encontrado';
+            } 
+        }
         public function login(){
             if(isset($_POST['user']) && isset($_POST['password'])){
-                $resultado = Check_user($_POST['user'], md5($_POST['password']));
-
-                if($resultado[0] >0){
-                    $key = 'KILLLAKILLERUIM';
-    
-                    //Header Token
-                    $header = [
-                        'typ' => 'JWT',
-                        'alg' => 'HS256'
-                    ];
-            
-                    //Payload - Content
-                    $payload = [
-                        'id' => $resultado[1],
-                        'name' => $_POST['user']
-                    ];
-            
-                    //JSON
-                    $header = json_encode($header);
-                    $payload = json_encode($payload);
-            
-                    //Base 64
-                    $header = base64_encode($header);
-                    $payload = base64_encode($payload);
-            
-                    //Sign
-                    $sign = hash_hmac('sha256', $header . "." . $payload, $key, true);
-                    $sign = base64_encode($sign);
-            
-                    //Token
-                    $token = $header . '.' . $payload . '.' . $sign;
-                    return array($token, $resultado[2], $resultado[3],  'email' => $resultado['email'], 'telefone' => $resultado['telefone'], 'endereco' => $resultado['endereco']);  
-                }
-                else{
-                    return 'Usuário não encontrado';
-                }    
+                return $this->Criar_token($_POST['user'], md5($_POST['password']));
             }
             else{
                 return 'Operação inválida';
@@ -131,7 +134,7 @@
                 }
                 $resultado = Check_user_email($email);
                 if($resultado[0] >0){
-                    return $resultado[1];
+                    return "Já existe";
                 }
                 else{
                     try{
@@ -160,7 +163,7 @@
                         $inserir2->bindValue(':email' ,$email);
                         $inserir2->execute();
                         $conexao =null;
-                        return '1';    
+                        return array("result" => '1', "token" => $this->Criar_token($email, $password));    
                     }
                     catch(Excepition $ex){
                         return '0';
@@ -172,29 +175,34 @@
             }
         }
         public function verificar(){
-            include('conexao.php');
-            $mail = $_POST["email"];
-            $sql = "SELECT id FROM users_info WHERE email = :email AND verif_code = :verif_code";
-            $pesquisa = $conexao->prepare($sql);
-            $pesquisa->bindValue(':email', $mail);
-            $pesquisa->bindValue(':verif_code', $_POST['verif_code']);
-            $pesquisa->execute();
-            if($pesquisa){
-                $puxar= $pesquisa->fetchAll();
-                if(count($puxar)> 0){
-                    $up = "UPDATE users_info SET verif_code = :verif_code WHERE email = :email";
-                    $p = $conexao->prepare($up);    
-                    $p->bindValue(":verif_code", null);
-                    $p->bindValue(":email", $mail);
-                    $p->execute();
-                    return '1';   
+            if($this->checkAuth()){
+                include('conexao.php');
+                $dados_sql = $this->dados_de_sql();
+                $sql = "SELECT id FROM users_info WHERE id = :id AND verif_code = :verif_code";
+                $pesquisa = $conexao->prepare($sql);
+                $pesquisa->bindValue(':id', $dados_sql->id);
+                $pesquisa->bindValue(':verif_code', $_POST['verif_code']);
+                $pesquisa->execute();
+                if($pesquisa){
+                    $puxar= $pesquisa->fetchAll();
+                    if(count($puxar)> 0){
+                        $up = "UPDATE users_info SET verif_code = :verif_code WHERE id = :id";
+                        $p = $conexao->prepare($up);    
+                        $p->bindValue(":verif_code", null);
+                        $p->bindValue(":id", $dados_sql->id);
+                        $p->execute();
+                        return '1';   
+                    }
+                    else{
+                        return '0';
+                    }        
                 }
                 else{
                     return '0';
-                }        
+                }
             }
             else{
-                return '0';
+                return "Usuário não autenticado";
             }
         }
         public static function checkAuth(){

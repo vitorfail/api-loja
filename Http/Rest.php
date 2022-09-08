@@ -19,6 +19,7 @@
     require_once('faturamento_ano.php');
     require_once('tipo_pagamento.php');
     require_once('contas.php');
+    require_once('editar_produtos.php');
 
     class Rest{
         private $request;

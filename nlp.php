@@ -8,17 +8,43 @@
     $GLOBALS['a'] = 'Authorization';
     $_POST = json_decode(file_get_contents("php://input"), true);
 
-    $total_documentos =  count($_POST['teste']);
+    $doc = array_map('strtolower', $_POST['teste']);
 
-    $termos = total_termos($_POST['teste']);
+    $total_documentos =  count($doc);
 
+    $termos = total_termos($doc);
+    $frenquencia_do_termo = caulcular_termo($doc, $termos);
+
+    function caulcular_documento($documentos, $tr){
+        //echo $tr." ";
+        $i = 0;
+        foreach ($documentos as $row) {
+            if($row !== "" and $row !== null and $row !== ' '){
+                $checar = strpos($row, $tr);
+                if($checar !== false){
+                    $i++;
+                }    
+            }
+        }
+        return $i;
+    }
+    function caulcular_termo($documentos, $termo){
+        $frequencia = array();
+        foreach($termo as $tr){
+            if($tr != '' and $tr != ' '){
+                $frequencia[$tr] = caulcular_documento($documentos, $tr);
+            }
+        }
+        return $frequencia;
+    }
 
     function total_termos($lista){
         $t = '';
         foreach($lista as $row){
             $t = $t.' '.$row;
         }
+        $t = preg_replace('/[0-9\@\.\;\" "]+/', ' ', $t);
         return explode(' ', $t);
     }
-    echo json_encode($termos); 
+    echo json_encode($frenquencia_do_termo); 
 ?>

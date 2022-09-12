@@ -37,7 +37,6 @@
         }
         return $frequencia;
     }
-
     function total_termos($lista){
         $t = '';
         foreach($lista as $row){
@@ -46,5 +45,7 @@
         $t = preg_replace('/[0-9\@\.\;\" "]+/', ' ', $t);
         return explode(' ', $t);
     }
+
+    $idf = 
     echo json_encode($frenquencia_do_termo); 
 ?>

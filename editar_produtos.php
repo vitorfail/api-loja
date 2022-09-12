@@ -16,7 +16,7 @@
                     $sql = "UPDATE `user-produtos` SET  `produto-nome`= :nome, quantidade = :quantidade, 
                     produto_valor = :valor, custo_indireto =  :custo_indireto , percentual = :percentual 
                      WHERE `user-id` = ".$dados_de_usuario_sql->id." AND id = :id";
-                    $resultado = $conexao->prepare($sql);
+                    $pesquisa = $conexao->prepare($sql);
                     $pesquisa->bindValue(':nome', $_POST['nome']);
                     $pesquisa->bindValue(':quantidade', $_POST['quantidade']);
                     $pesquisa->bindValue(':valor', $_POST['valor']);

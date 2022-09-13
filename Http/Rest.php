@@ -11,6 +11,7 @@
     require_once('Controllers/AuthController.php');
     require_once('inserir_produtos.php');
     require_once('inserir_despesas.php');
+    require_once('inserir_custos.php');
     require_once('inserir_venda.php');
     require_once('inserir_imagem.php');
     require_once('produtos.php');

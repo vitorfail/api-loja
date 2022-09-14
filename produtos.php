@@ -8,6 +8,41 @@
 
     $_POST= json_decode(file_get_contents('php://input'), true);
     class ProdutosController{
+        public function custo_fixo(){
+            if(AuthController::checkAuth()){
+                include('conexao.php');
+                $ano = date("Y");
+                $mes = date("m");
+                $dados_de_usuario_sql = AuthController::dados_de_sql(); 
+                $custo_fixo = "SELECT SUM(valor_custo) FROM user_custos_fixo WHERE (user_id, YEAR(data_pagamento), MONTH(data_pagamento), situacao) = (".$dados_de_usuario_sql->id.", ".$ano.", ".$mes.", 'Pago')";
+                $pesquisa = $conexao->query($custo_fixo);
+                $resultado = $pesquisa->fetchAll();
+                if($resultado[0]["SUM(valor_custo)"] == null){
+                    return 0;
+                }
+                else{
+                    return $resultado[0]["SUM(valor_custo)"];
+                }    
+            }
+            else{
+                return 'Usuário não autenticado';              
+            }
+        }
+        public function numero_de_roupas(){
+            if(AuthController::checkAuth()){
+                include('conexao.php');
+                $dados_de_usuario_sql = AuthController::dados_de_sql(); 
+                $sql = "SELECT SUM(quantidade) FROM `user-produtos` WHERE Vendido='Não' AND `user-id`= ".$dados_de_usuario_sql->id;
+                $pesquisa = $conexao->query($sql);
+                $resultado = $pesquisa->fetchAll();
+                $total = $resultado[0]["SUM(quantidade)"];
+                $conexao = null;
+                return $total;            
+            }
+            else{
+                return 'Usuário não autenticado';              
+            }
+        }
         public function pesquisa(){
             if(AuthController::checkAuth()){
                 try{
@@ -24,6 +59,7 @@
                     $produto_valor = [];
                     $custo_indireto = [];
                     $percentual = [];
+                    $custo_fixo = floatval($this->custo_fixo()) /intval($this->numero_de_roupas());
                     if(count($pesquisa) == 0){
                         $ids = 0;
                         $nomes = 0; 
@@ -42,7 +78,7 @@
                             array_push($percentual, $linha['percentual']);
                         }
                     }    
-                    return array('id'=> $ids, 'nomes' => $nomes, 'qtd' => $qtd, 'produto_valor' => $produto_valor, 'custo_indireto' => $custo_indireto, 'percentual' => $percentual);
+                    return array('id'=> $ids, 'nomes' => $nomes, 'qtd' => $qtd, 'produto_valor' => $produto_valor, 'custo_indireto' => $custo_indireto, 'percentual' => $percentual, "custo_fixo" => $custo_fixo);
                 }
                 catch(Exception $ex){
                     $conexao = null;  
